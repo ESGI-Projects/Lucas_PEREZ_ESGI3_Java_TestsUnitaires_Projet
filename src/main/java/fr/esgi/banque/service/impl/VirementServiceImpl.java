@@ -21,6 +21,9 @@ public class VirementServiceImpl {
 
 	public Virement virer(String numeroSource, String numeroDestination, BigDecimal montant) {
 		verifierMontantStrictementPositif(montant);
+		if (numeroSource.equals(numeroDestination)) {
+			throw new IllegalArgumentException("Un virement vers le même compte est interdit");
+		}
 		return null;
 	}
 
