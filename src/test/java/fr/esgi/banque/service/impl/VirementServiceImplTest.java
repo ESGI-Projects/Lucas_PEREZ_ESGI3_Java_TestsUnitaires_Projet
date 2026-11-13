@@ -54,6 +54,21 @@ class VirementServiceImplTest {
 		service = new VirementServiceImpl(repository, notifications, VENDREDI);
 	}
 
+	/** Fabrique un vrai compte (objet métier simple, pas de mock), sans découvert autorisé. */
+	private static Compte compte(String numero, String solde) {
+		return new Compte(numero, "Titulaire " + numero, new BigDecimal(solde), BigDecimal.ZERO);
+	}
+
+	/** Bouchon : le repository trouve ce compte par son numéro. */
+	private void stubCompte(Compte compte) {
+		when(repository.trouver(compte.getNumero())).thenReturn(Optional.of(compte));
+	}
+
+	/** Bouchon : le repository ne trouve aucun compte pour ce numéro. */
+	private void stubCompteInexistant(String numero) {
+		when(repository.trouver(numero)).thenReturn(Optional.empty());
+	}
+
 	@Nested
 	@DisplayName("V1 : un montant null, nul ou négatif est refusé")
 	class V1Montant {
@@ -102,7 +117,7 @@ class VirementServiceImplTest {
 		@DisplayName("Un compte source inexistant lève CompteIntrouvableException")
 		void virer_sourceInexistante_leveCompteIntrouvableException() {
 			// Arrange
-			when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.empty());
+			stubCompteInexistant(NUMERO_SOURCE);
 
 			// Act / Assert
 			assertThatThrownBy(() -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT))
@@ -113,9 +128,8 @@ class VirementServiceImplTest {
 		@DisplayName("Un compte destination inexistant lève CompteIntrouvableException")
 		void virer_destinationInexistante_leveCompteIntrouvableException() {
 			// Arrange
-			Compte source = new Compte(NUMERO_SOURCE, "Alice", new BigDecimal("100.00"), BigDecimal.ZERO);
-			when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.of(source));
-			when(repository.trouver(NUMERO_DESTINATION)).thenReturn(Optional.empty());
+			stubCompte(compte(NUMERO_SOURCE, "100.00"));
+			stubCompteInexistant(NUMERO_DESTINATION);
 
 			// Act / Assert
 			assertThatThrownBy(() -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT))
@@ -126,9 +140,8 @@ class VirementServiceImplTest {
 		@DisplayName("Quand un compte est introuvable, aucun compte n'est sauvegardé")
 		void virer_destinationInexistante_aucuneSauvegarde() {
 			// Arrange
-			Compte source = new Compte(NUMERO_SOURCE, "Alice", new BigDecimal("100.00"), BigDecimal.ZERO);
-			when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.of(source));
-			when(repository.trouver(NUMERO_DESTINATION)).thenReturn(Optional.empty());
+			stubCompte(compte(NUMERO_SOURCE, "100.00"));
+			stubCompteInexistant(NUMERO_DESTINATION);
 
 			// Act
 			catchThrowable(() -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT));

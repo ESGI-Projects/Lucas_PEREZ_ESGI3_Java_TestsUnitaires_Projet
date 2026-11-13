@@ -24,11 +24,14 @@ public class VirementServiceImpl {
 	public Virement virer(String numeroSource, String numeroDestination, BigDecimal montant) {
 		verifierMontantStrictementPositif(montant);
 		verifierComptesDifferents(numeroSource, numeroDestination);
-		Compte source = repository.trouver(numeroSource)
-				.orElseThrow(() -> new CompteIntrouvableException(numeroSource));
-		Compte destination = repository.trouver(numeroDestination)
-				.orElseThrow(() -> new CompteIntrouvableException(numeroDestination));
+		Compte source = trouverCompte(numeroSource);
+		Compte destination = trouverCompte(numeroDestination);
 		return null;
+	}
+
+	private Compte trouverCompte(String numero) {
+		return repository.trouver(numero)
+				.orElseThrow(() -> new CompteIntrouvableException(numero));
 	}
 
 	private static void verifierComptesDifferents(String numeroSource, String numeroDestination) {
