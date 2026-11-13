@@ -39,6 +39,7 @@ class VirementServiceImplTest {
 	/** Vendredi 13/11/2026 à 10h : un jour ouvré. */
 	private static final Clock VENDREDI = Clock.fixed(
 			ZonedDateTime.of(2026, 11, 13, 10, 0, 0, 0, PARIS).toInstant(), PARIS);
+	private static final LocalDate AUJOURD_HUI = LocalDate.now(VENDREDI);
 
 	private static final String NUMERO_SOURCE = "FR001";
 	private static final String NUMERO_DESTINATION = "FR002";
@@ -208,7 +209,7 @@ class VirementServiceImplTest {
 
 			// Assert
 			assertThat(virement).isEqualTo(
-					new Virement(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT, LocalDate.of(2026, 11, 13)));
+					new Virement(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT, AUJOURD_HUI));
 		}
 	}
 

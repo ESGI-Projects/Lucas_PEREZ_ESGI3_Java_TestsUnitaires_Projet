@@ -27,11 +27,16 @@ public class VirementServiceImpl {
 		verifierComptesDifferents(numeroSource, numeroDestination);
 		Compte source = trouverCompte(numeroSource);
 		Compte destination = trouverCompte(numeroDestination);
+		executer(source, destination, montant);
+		return new Virement(numeroSource, numeroDestination, montant, LocalDate.now(horloge));
+	}
+
+	/** Débite d'abord (peut lever SoldeInsuffisantException), puis crédite et sauvegarde les deux comptes. */
+	private void executer(Compte source, Compte destination, BigDecimal montant) {
 		source.debiter(montant);
 		destination.crediter(montant);
 		repository.sauvegarder(source);
 		repository.sauvegarder(destination);
-		return new Virement(numeroSource, numeroDestination, montant, LocalDate.now(horloge));
 	}
 
 	private Compte trouverCompte(String numero) {
