@@ -21,10 +21,14 @@ public class VirementServiceImpl {
 
 	public Virement virer(String numeroSource, String numeroDestination, BigDecimal montant) {
 		verifierMontantStrictementPositif(montant);
+		verifierComptesDifferents(numeroSource, numeroDestination);
+		return null;
+	}
+
+	private static void verifierComptesDifferents(String numeroSource, String numeroDestination) {
 		if (numeroSource.equals(numeroDestination)) {
 			throw new IllegalArgumentException("Un virement vers le même compte est interdit");
 		}
-		return null;
 	}
 
 	private static void verifierMontantStrictementPositif(BigDecimal montant) {
