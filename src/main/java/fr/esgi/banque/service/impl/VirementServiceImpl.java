@@ -28,6 +28,9 @@ public class VirementServiceImpl {
 		Compte source = trouverCompte(numeroSource);
 		Compte destination = trouverCompte(numeroDestination);
 		executer(source, destination, montant);
+		if (montant.compareTo(new BigDecimal("10000")) > 0) {
+			notifications.alerter(source.getTitulaire(), "Virement important de " + montant + " € depuis le compte " + numeroSource);
+		}
 		return new Virement(numeroSource, numeroDestination, montant, LocalDate.now(horloge));
 	}
 
