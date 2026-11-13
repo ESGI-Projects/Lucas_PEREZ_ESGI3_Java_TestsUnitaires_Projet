@@ -248,7 +248,7 @@ Mesure IntelliJ (*Run with Coverage*), 84 tests verts sous JDK 21 :
 
 ## 8. Utilisation de l'IA
 
-L'usage de l'IA étant autorisé dans ce module, je précise ici comment je l'ai utilisée, par transparence.
+J'ai utilisé l'IA dans ce projet. Par transparence, je détaille ci-dessous les éléments sur lesquels elle a eu un impact.
 Je la considère comme un outil qui n'est pas indispensable, mais devenu nécessaire pour s'adapter à la
 vitesse d'exécution attendue et à l'évolution des technologies. Elle n'a pas remplacé la réflexion.
 
@@ -290,5 +290,5 @@ Objectif : prendre en main plus rapidement et plus efficacement l'environnement 
 
 L'IA m'a apporté de la vitesse, de la rigueur sur les valeurs limites et des cas que j'aurais pu oublier, ainsi
 qu'un gain de temps sur la rédaction de la documentation. J'ai conçu les éléments et l'IA a exécuté les tâches à
-partir de ce que j'avais imaginé : c'est un outil que j'ai utilisé, pas un remplacement sur le plan intellectuel,
-et la compréhension du code reste la mienne.
+partir de ce que j'avais imaginé : c'est un outil que j'ai utilisé, pas un remplacement sur le plan intellectuel.
+La compréhension, la conception, l'interprétation et l'analyse du code restent les miennes.
