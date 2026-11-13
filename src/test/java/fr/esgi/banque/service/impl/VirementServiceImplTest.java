@@ -6,6 +6,7 @@ import fr.esgi.banque.service.CompteIntrouvableException;
 import fr.esgi.banque.service.CompteRepository;
 import fr.esgi.banque.service.NotificationService;
 import fr.esgi.banque.service.Virement;
+import fr.esgi.banque.service.VirementRefuseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,6 +44,11 @@ class VirementServiceImplTest {
 	private static final Clock VENDREDI = Clock.fixed(
 			ZonedDateTime.of(2026, 11, 13, 10, 0, 0, 0, PARIS).toInstant(), PARIS);
 	private static final LocalDate AUJOURD_HUI = LocalDate.now(VENDREDI);
+	/** Samedi 14/11/2026 et dimanche 15/11/2026 à 10h. */
+	private static final Clock SAMEDI = Clock.fixed(
+			ZonedDateTime.of(2026, 11, 14, 10, 0, 0, 0, PARIS).toInstant(), PARIS);
+	private static final Clock DIMANCHE = Clock.fixed(
+			ZonedDateTime.of(2026, 11, 15, 10, 0, 0, 0, PARIS).toInstant(), PARIS);
 
 	private static final String NUMERO_SOURCE = "FR001";
 	private static final String NUMERO_DESTINATION = "FR002";
@@ -277,6 +283,63 @@ class VirementServiceImplTest {
 
 			// Assert
 			verify(notifications).alerter(eq(source.getTitulaire()), anyString());
+		}
+	}
+
+	@Nested
+	@DisplayName("V7 : aucun virement le dimanche")
+	class V7Dimanche {
+
+		@Test
+		@DisplayName("Un virement le dimanche lève VirementRefuseException")
+		void virer_leDimanche_leveVirementRefuseException() {
+			// Arrange
+			VirementServiceImpl serviceDimanche = new VirementServiceImpl(repository, notifications, DIMANCHE);
+
+			// Act / Assert
+			assertThatThrownBy(() -> serviceDimanche.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT))
+					.isInstanceOf(VirementRefuseException.class);
+		}
+
+		@Test
+		@DisplayName("Un virement refusé le dimanche ne sauvegarde aucun compte")
+		void virer_leDimanche_aucuneSauvegarde() {
+			// Arrange
+			VirementServiceImpl serviceDimanche = new VirementServiceImpl(repository, notifications, DIMANCHE);
+
+			// Act
+			catchThrowable(() -> serviceDimanche.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT));
+
+			// Assert
+			verify(repository, never()).sauvegarder(any());
+		}
+
+		@Test
+		@DisplayName("Un virement refusé le dimanche n'envoie aucune alerte, même au-delà de 10 000 €")
+		void virer_leDimanche_aucuneAlerte() {
+			// Arrange
+			VirementServiceImpl serviceDimanche = new VirementServiceImpl(repository, notifications, DIMANCHE);
+
+			// Act
+			catchThrowable(() -> serviceDimanche.virer(NUMERO_SOURCE, NUMERO_DESTINATION, new BigDecimal("10000.01")));
+
+			// Assert
+			verifyNoInteractions(notifications);
+		}
+
+		@Test
+		@DisplayName("Un virement le samedi est accepté")
+		void virer_leSamedi_estAccepte() {
+			// Arrange
+			VirementServiceImpl serviceSamedi = new VirementServiceImpl(repository, notifications, SAMEDI);
+			stubCompte(compte(NUMERO_SOURCE, "100.00"));
+			stubCompte(compte(NUMERO_DESTINATION, "20.00"));
+
+			// Act
+			Virement virement = serviceSamedi.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT);
+
+			// Assert
+			assertThat(virement.date()).isEqualTo(LocalDate.of(2026, 11, 14));
 		}
 	}
 
