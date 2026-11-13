@@ -277,4 +277,36 @@ class CompteTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("C7 : un compte est à découvert quand son solde est strictement négatif")
+	class C7EstADecouvert {
+
+		@Test
+		@DisplayName("Un solde de -0,01 met le compte à découvert")
+		void estADecouvert_soldeNegatif_renvoieVrai() {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, new BigDecimal("-0.01"), DECOUVERT);
+
+			// Act
+			boolean aDecouvert = compte.estADecouvert();
+
+			// Assert
+			assertThat(aDecouvert).isTrue();
+		}
+
+		@ParameterizedTest(name = "solde {0}")
+		@ValueSource(strings = {"0", "0.00", "0.01"})
+		@DisplayName("Un solde nul ou positif ne met pas le compte à découvert")
+		void estADecouvert_soldeNulOuPositif_renvoieFaux(String solde) {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, new BigDecimal(solde), DECOUVERT);
+
+			// Act
+			boolean aDecouvert = compte.estADecouvert();
+
+			// Assert
+			assertThat(aDecouvert).isFalse();
+		}
+	}
+
 }
