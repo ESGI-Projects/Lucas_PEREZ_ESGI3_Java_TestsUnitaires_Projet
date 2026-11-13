@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
@@ -46,6 +47,26 @@ class CalculFraisTest {
 			// Arrange / Act / Assert
 			assertThatThrownBy(() -> calculFrais.fraisMensuels(AGE_ADULTE, null, false))
 					.isInstanceOf(IllegalArgumentException.class);
+		}
+	}
+
+	@Nested
+	@DisplayName("F2 : frais de tenue de compte de 2,00 € par mois")
+	class F2FraisDeTenue {
+
+		@ParameterizedTest(name = "âge {0}, solde moyen {1}")
+		@CsvSource({
+				"27, 999.99",
+				"30, 500.00",
+				"65, 0"
+		})
+		@DisplayName("Sans exonération ni carte premium, les frais sont de 2,00 €")
+		void fraisMensuels_sansExonerationNiPremium_renvoieFraisDeTenue(int age, String soldeMoyen) {
+			// Act
+			BigDecimal frais = calculFrais.fraisMensuels(age, new BigDecimal(soldeMoyen), false);
+
+			// Assert
+			assertThat(frais).isEqualByComparingTo("2.00");
 		}
 	}
 
