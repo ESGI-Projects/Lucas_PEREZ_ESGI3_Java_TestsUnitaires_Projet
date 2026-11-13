@@ -71,4 +71,47 @@ class CompteTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("C2 : solde initial et découvert obligatoires, découvert positif ou nul")
+	class C2SoldeEtDecouvert {
+
+		@Test
+		@DisplayName("Un solde initial null est refusé")
+		void constructeur_soldeNull_leveIllegalArgumentException() {
+			// Arrange / Act / Assert
+			assertThatThrownBy(() -> new Compte(NUMERO, TITULAIRE, null, DECOUVERT))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		@DisplayName("Un découvert autorisé null est refusé")
+		void constructeur_decouvertNull_leveIllegalArgumentException() {
+			// Arrange / Act / Assert
+			assertThatThrownBy(() -> new Compte(NUMERO, TITULAIRE, SOLDE, null))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		@DisplayName("Un découvert autorisé négatif (-0,01) est refusé")
+		void constructeur_decouvertNegatif_leveIllegalArgumentException() {
+			// Arrange
+			BigDecimal decouvertNegatif = new BigDecimal("-0.01");
+
+			// Act / Assert
+			assertThatThrownBy(() -> new Compte(NUMERO, TITULAIRE, SOLDE, decouvertNegatif))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@ParameterizedTest(name = "découvert {0}")
+		@ValueSource(strings = {"0", "0.00", "0.01"})
+		@DisplayName("Un découvert autorisé nul ou positif est accepté")
+		void constructeur_decouvertPositifOuNul_creeLeCompte(String decouvert) {
+			// Act
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, new BigDecimal(decouvert));
+
+			// Assert
+			assertThat(compte.getDecouvertAutorise()).isEqualByComparingTo(decouvert);
+		}
+	}
+
 }
