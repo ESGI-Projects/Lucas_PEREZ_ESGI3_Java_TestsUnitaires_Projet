@@ -4,6 +4,31 @@
 - **Prénom** : Lucas
 - **Campus** : ESGI Aix – Campus Skolae
 
+## Démarche suivie
+
+```mermaid
+flowchart TD
+    A[Lecture du sujet et du code fourni] --> B[Plan de tests par règle : cas limites, doublures]
+    B --> C{Partie A : règle suivante}
+    C --> D[Écrire le test de la règle]
+    D --> E[mvn test]
+    E -->|vert : règle conforme| F[commit test:]
+    E -->|rouge : défaut prouvé| G[commit test: rouge]
+    G --> H[Corriger le code, mvn test vert]
+    H --> I[commit fix:]
+    F --> C
+    I --> C
+    C -->|C1 à C7 et F1 à F5 faites| J{Partie B : règle suivante}
+    J --> K[Écrire le test, mvn test rouge]
+    K --> L[commit red:]
+    L --> M[Code minimal, mvn test vert]
+    M --> N[commit green:]
+    N --> O[Améliorer service ou tests, mvn test vert]
+    O --> P[commit refactor:]
+    P --> J
+    J -->|V1 à V7 faites| Q[Couverture IntelliJ et RENDU.md]
+```
+
 ## Partie A — défauts trouvés
 
 Chaque défaut est prouvé par un commit `test:` (rouge) suivi immédiatement du commit `fix:`.
@@ -61,6 +86,27 @@ virement sans rien sauvegarder. Les tests de V5 ont été écrits et sont passé
 validés en inversant temporairement l'ordre (sauvegarde avant débit) : `virer_soldeInsuffisant_aucuneSauvegarde`
 échoue alors bien. Aucun refactor pertinent pour cette règle.
 
+### Organigramme de `virer()`
+
+```mermaid
+flowchart TD
+    A([virer source, destination, montant]) --> B{"montant null ou <= 0 ?"}
+    B -->|oui| X1[IllegalArgumentException - V1]
+    B -->|non| C{source = destination ?}
+    C -->|oui| X2[IllegalArgumentException - V2]
+    C -->|non| D{"aujourd'hui = dimanche ?"}
+    D -->|oui| X3[VirementRefuseException - V7]
+    D -->|non| E{source et destination trouvées ?}
+    E -->|non| X4[CompteIntrouvableException - V3]
+    E -->|oui| F{débit de la source possible ?}
+    F -->|non| X5["SoldeInsuffisantException - V5, rien n'est sauvegardé"]
+    F -->|oui| G[Créditer la destination, sauvegarder les deux comptes - V4]
+    G --> H{"montant > 10 000 € ?"}
+    H -->|oui| I[Alerter le titulaire source - V6]
+    H -->|non| J
+    I --> J([Renvoyer Virement avec la date du jour])
+```
+
 Ordre des contrôles dans `virer` : montant (V1) → comptes différents (V2) → jour ouvré (V7) → recherche des
 comptes (V3) → débit puis crédit et sauvegardes (V4, V5) → alerte éventuelle (V6, seulement si le virement a réussi).
 
@@ -68,4 +114,15 @@ Valeurs limites de V6 testées : 9 999,99 €, 10 000 € et 10 000,00 € (pas 
 
 ## Couverture de code
 
-_Capture IntelliJ (Run with Coverage) à venir._
+![Couverture](docs/couverture.png)
+
+Mesure IntelliJ (*Run with Coverage*), 84 tests, tous verts :
+
+| Classes | Méthodes | Lignes | Branches |
+|---|---|---|---|
+| 100 % (7/7) | 100 % (26/26) | 100 % (86/86) | 100 % (50/50) |
+
+Tests exécutés sous JDK 21 ; sous JDK 25, Mockito 5.14.2 du pom fourni ne peut pas créer ses mocks
+(Byte Buddy ne reconnaît pas Java 25 : « Could not initialize plugin: MockMaker »). Seuls les 25 tests de
+`VirementServiceImplTest` (qui utilisent Mockito) sont concernés ; les 59 tests de `Compte` et `CalculFrais` passent.
+Le pom fourni n'a pas été modifié.
