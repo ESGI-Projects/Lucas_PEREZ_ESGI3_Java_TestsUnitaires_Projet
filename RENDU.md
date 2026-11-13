@@ -16,6 +16,7 @@
 5. [Partie B — service de virement en TDD](#5-partie-b--service-de-virement-en-tdd)
 6. [Justifications](#6-justifications)
 7. [Couverture de code](#7-couverture-de-code)
+8. [Utilisation de l'IA](#8-utilisation-de-lia)
 
 ---
 
@@ -242,3 +243,52 @@ Mesure IntelliJ (*Run with Coverage*), 84 tests verts sous JDK 21 :
 | 100 % (7/7) | 100 % (26/26) | 100 % (86/86) | 100 % (50/50) |
 
 `CompteRepository` et `NotificationService` apparaissent à 0/0 : ce sont des interfaces, sans code exécutable.
+
+---
+
+## 8. Utilisation de l'IA
+
+L'usage de l'IA étant autorisé dans ce module, je précise ici comment je l'ai utilisée, par transparence.
+Je la considère comme un outil qui n'est pas indispensable, mais devenu nécessaire pour s'adapter à la
+vitesse d'exécution attendue et à l'évolution des technologies. Elle n'a pas remplacé la réflexion.
+
+### 8.1 Outils
+
+- **Claude** : analyse du sujet et du code, échanges sur la rédaction des tests, vérifications.
+- **Claude Code** : exécution des tâches dans le projet (tests, code, `mvn test`, commits).
+- **Codex** : réflexion externe, sans intervention directe dans le dépôt.
+
+Objectif : prendre en main plus rapidement et plus efficacement l'environnement de développement.
+
+### 8.2 Ce que l'IA a fait
+
+- Accompagnement dans l'analyse du sujet et du code fourni, que je n'avais pas écrit, pour en faciliter la compréhension.
+- Échanges multiples sur la façon de rédiger les tests, puis écriture des tests.
+- Repérage, avec moi, des défauts de la partie A : j'ai indiqué à l'IA ceux que j'avais vus, et je lui ai
+  demandé de compléter.
+- Diagnostic plus rapide des problèmes de compilation et d'exécution (par exemple Mockito avec le JDK 25).
+- Exécution des tâches que je lui ai déléguées pour tenir le délai : écriture du code à partir de mes
+  choix, `mvn test` à chaque étape, commits, rédaction de ce document.
+
+### 8.3 Ce que j'ai fait
+
+- **Architecture et logique** : l'architecture, la logique du code, des méthodes et des classes de l'ensemble du
+  projet (notamment le service de virement de la partie B), et la logique des algorithmes mis en place, dont
+  l'ordre des contrôles de `virer()`.
+- **Mise en place** : environnement, intégration git, organisation des fichiers et structure du rendu.
+- **Documentation** : imaginée et structurée par moi (contenu, organigrammes, justifications, cette section),
+  rédigée par l'IA.
+- **Validation** : relecture et validation des étapes avant commit.
+
+### 8.4 Contrôle du résultat
+
+- `mvn test` exécuté à chaque étape par l'IA, pour gagner du temps : vérification qu'un commit `test:` de défaut
+  ou `red:` est bien rouge et que chaque `fix:`, `green:` et `refactor:` est vert.
+- Couverture mesurée dans IntelliJ : 100 %.
+
+### 8.5 Bilan
+
+L'IA m'a apporté de la vitesse, de la rigueur sur les valeurs limites et des cas que j'aurais pu oublier, ainsi
+qu'un gain de temps sur la rédaction de la documentation. J'ai conçu les éléments et l'IA a exécuté les tâches à
+partir de ce que j'avais imaginé : c'est un outil que j'ai utilisé, pas un remplacement sur le plan intellectuel,
+et la compréhension du code reste la mienne.
