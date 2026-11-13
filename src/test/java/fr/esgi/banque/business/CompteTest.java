@@ -244,4 +244,37 @@ class CompteTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("C6 : un compte est vide quand son solde vaut zéro, quelle que soit l'écriture")
+	class C6EstVide {
+
+		@ParameterizedTest(name = "solde {0}")
+		@ValueSource(strings = {"0", "0.00", "0.000"})
+		@DisplayName("Un solde nul (0, 0.00, 0.000) rend le compte vide")
+		void estVide_soldeNulQuelleQueSoitLEchelle_renvoieVrai(String solde) {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, new BigDecimal(solde), DECOUVERT);
+
+			// Act
+			boolean vide = compte.estVide();
+
+			// Assert
+			assertThat(vide).isTrue();
+		}
+
+		@ParameterizedTest(name = "solde {0}")
+		@ValueSource(strings = {"0.01", "-0.01"})
+		@DisplayName("Un solde non nul ne rend pas le compte vide")
+		void estVide_soldeNonNul_renvoieFaux(String solde) {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, new BigDecimal(solde), DECOUVERT);
+
+			// Act
+			boolean vide = compte.estVide();
+
+			// Assert
+			assertThat(vide).isFalse();
+		}
+	}
+
 }
