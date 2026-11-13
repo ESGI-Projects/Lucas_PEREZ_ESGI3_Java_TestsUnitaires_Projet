@@ -286,7 +286,20 @@ Objectif : prendre en main plus rapidement et plus efficacement l'environnement 
   ou `red:` est bien rouge et que chaque `fix:`, `green:` et `refactor:` est vert.
 - Couverture mesurée dans IntelliJ : 100 %.
 
-### 8.5 Bilan
+### 8.5 Comparatif entre mes réflexions et celles de l'IA
+
+| Domaine | Apport de l'IA | Ce qui a été retenu |
+|---|---|---|
+| Architecture et construction du code | Propositions d'organisation du service et des contrôles | Ma logique a été privilégiée dans environ **70 %** des cas (estimation personnelle) |
+| Logique des tests | Interprétations que je n'avais pas eues : valeurs limites supplémentaires (`0.000`, samedi pour V7, `10 000,00` pour V6), séparation de `verifyNoInteractions` dans un test dédié, `eq()` sur le titulaire et `anyString()` sur le message | Retenues : elles renforcent la détection des défauts sans alourdir les tests |
+| Méthode TDD | Proposition initiale de ne faire un `refactor:` que « s'il y a matière » | Corrigée : le sujet exige un cycle rouge / vert / refactor visible pour chaque règle |
+| Documentation | Rédaction rapide et vérification de cohérence | Deux inexactitudes relevées et corrigées avant le rendu (préfixe `docs:`, portée de `verifyNoInteractions`) |
+
+**Ce qui a bien fonctionné** : la rigueur de l'IA sur les cas limites et la vérification systématique par
+`mvn test`. **Ce qui a nécessité un recadrage** : certaines propositions devaient être confrontées au sujet
+avant d'être appliquées.
+
+### 8.6 Bilan
 
 L'IA m'a apporté de la vitesse, de la rigueur sur les valeurs limites et des cas que j'aurais pu oublier, ainsi
 qu'un gain de temps sur la rédaction de la documentation. J'ai conçu les éléments et l'IA a exécuté les tâches à
