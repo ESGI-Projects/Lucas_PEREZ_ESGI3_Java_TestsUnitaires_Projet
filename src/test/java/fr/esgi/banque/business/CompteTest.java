@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 /**
  * Test d'exemple fourni pour vérifier que le projet est bien configuré.
@@ -193,6 +195,52 @@ class CompteTest {
 
 			// Assert
 			assertThat(compte.getSolde()).isEqualByComparingTo("70.00");
+		}
+	}
+
+	@Nested
+	@DisplayName("C5 : débit autorisé jusqu'à -découvert inclus")
+	class C5LimiteDecouvert {
+
+		@ParameterizedTest(name = "débit {0} -> solde {1}")
+		@CsvSource({
+				"299.99, -199.99",
+				"300.00, -200.00"
+		})
+		@DisplayName("Solde 100, découvert 200 : un débit jusqu'à la limite exacte est accepté")
+		void debiter_jusquALaLimiteDuDecouvert_estAccepte(String montant, String soldeAttendu) {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, DECOUVERT);
+
+			// Act
+			compte.debiter(new BigDecimal(montant));
+
+			// Assert
+			assertThat(compte.getSolde()).isEqualByComparingTo(soldeAttendu);
+		}
+
+		@Test
+		@DisplayName("Solde 100, découvert 200 : débiter 300,01 lève SoldeInsuffisantException")
+		void debiter_auDelaDuDecouvert_leveSoldeInsuffisantException() {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, DECOUVERT);
+
+			// Act / Assert
+			assertThatThrownBy(() -> compte.debiter(new BigDecimal("300.01")))
+					.isInstanceOf(SoldeInsuffisantException.class);
+		}
+
+		@Test
+		@DisplayName("Un débit refusé pour solde insuffisant ne modifie pas le solde")
+		void debiter_auDelaDuDecouvert_soldeInchange() {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, DECOUVERT);
+
+			// Act
+			catchThrowable(() -> compte.debiter(new BigDecimal("300.01")));
+
+			// Assert
+			assertThat(compte.getSolde()).isEqualByComparingTo("100.00");
 		}
 	}
 
