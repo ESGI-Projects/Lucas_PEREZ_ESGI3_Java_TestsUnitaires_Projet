@@ -155,4 +155,45 @@ class CompteTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("C4 : on ne débite qu'un montant strictement positif")
+	class C4Debiter {
+
+		@Test
+		@DisplayName("Débiter un montant null est refusé")
+		void debiter_montantNull_leveIllegalArgumentException() {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, DECOUVERT);
+
+			// Act / Assert
+			assertThatThrownBy(() -> compte.debiter(null))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@ParameterizedTest(name = "montant {0}")
+		@ValueSource(strings = {"0", "0.00", "-0.01"})
+		@DisplayName("Débiter un montant nul ou négatif est refusé")
+		void debiter_montantNulOuNegatif_leveIllegalArgumentException(String montant) {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, DECOUVERT);
+
+			// Act / Assert
+			assertThatThrownBy(() -> compte.debiter(new BigDecimal(montant)))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		@DisplayName("Débiter un montant positif diminue le solde")
+		void debiter_montantPositif_diminueLeSolde() {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, DECOUVERT);
+
+			// Act
+			compte.debiter(new BigDecimal("30.00"));
+
+			// Assert
+			assertThat(compte.getSolde()).isEqualByComparingTo("70.00");
+		}
+	}
+
 }
