@@ -18,6 +18,16 @@ Chaque défaut est prouvé par un commit `test:` (rouge) suivi immédiatement du
 
 Règles C1, C2, C4 et C7 : conformes, couvertes par des tests (`CompteTest`).
 
+### Classe `CalculFrais`
+
+| Règle | Défaut constaté | Correction | Test qui le prouve |
+|---|---|---|---|
+| F3 | `ageTitulaire <= AGE_JEUNE` : un titulaire de **26 ans** était exonéré de la tenue alors que la règle vise les moins de 26 ans. | `ageTitulaire < AGE_JEUNE` | `CalculFraisTest.F3Jeune#fraisMensuels_selonAge_tenueOfferteAvant26Ans` (cas 26 ans → 2.00) |
+| F4 | `soldeMoyen.compareTo(SEUIL_GRATUITE) > 0` : un solde moyen de **1 000 € pile** payait la tenue alors qu'elle est offerte dès 1 000 €. | `compareTo(...) >= 0` | `CalculFraisTest.F4SoldeEleve#fraisMensuels_selonSoldeMoyen_tenueOfferteDes1000` (cas `1000` et `1000.00` → 0) |
+| F5 | Les `return BigDecimal.ZERO` anticipés (tenue offerte) sortaient de la méthode avant l'ajout du supplément premium : un jeune ou un gros solde avec carte premium payait 0 € au lieu de 5,00 €. | Calcul de la tenue (0 ou 2,00) via un booléen `tenueOfferte`, puis ajout systématique du supplément premium | `CalculFraisTest.F5CartePremium#fraisMensuels_avecCartePremium_ajouteLeSupplement` (cas 25 ans / 500 €, 30 ans / 1 000 €, 25 ans / 1 000 € → 5.00) |
+
+Règles F1 et F2 : conformes, couvertes par des tests (`CalculFraisTest`).
+
 ## Partie B — service de virement (TDD)
 
 _En cours._
