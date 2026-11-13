@@ -112,4 +112,25 @@ class CalculFraisTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("F5 : la carte premium ajoute 5,00 €, toujours dus")
+	class F5CartePremium {
+
+		@ParameterizedTest(name = "âge {0}, solde moyen {1}, premium -> frais {2}")
+		@CsvSource({
+				"27, 500.00, 7.00",
+				"25, 500.00, 5.00",
+				"30, 1000.00, 5.00",
+				"25, 1000.00, 5.00"
+		})
+		@DisplayName("Le supplément premium s'ajoute à la tenue, même quand elle est offerte")
+		void fraisMensuels_avecCartePremium_ajouteLeSupplement(int age, String soldeMoyen, String fraisAttendus) {
+			// Act
+			BigDecimal frais = calculFrais.fraisMensuels(age, new BigDecimal(soldeMoyen), true);
+
+			// Assert
+			assertThat(frais).isEqualByComparingTo(fraisAttendus);
+		}
+	}
+
 }
