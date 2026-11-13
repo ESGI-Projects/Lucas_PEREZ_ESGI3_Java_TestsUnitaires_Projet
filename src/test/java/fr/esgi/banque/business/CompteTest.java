@@ -15,8 +15,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 /**
- * Test d'exemple fourni pour vérifier que le projet est bien configuré.
- * À compléter (partie A).
+ * Tests des règles C1 à C7 de {@link Compte} (une classe {@code @Nested} par règle) ;
+ * le test fourni {@code shouldIncreaseBalanceWhenCrediting} est conservé.
  */
 class CompteTest {
 
