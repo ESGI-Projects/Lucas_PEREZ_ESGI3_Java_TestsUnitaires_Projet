@@ -1,5 +1,7 @@
 package fr.esgi.banque.service.impl;
 
+import fr.esgi.banque.business.Compte;
+import fr.esgi.banque.service.CompteIntrouvableException;
 import fr.esgi.banque.service.CompteRepository;
 import fr.esgi.banque.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,10 +19,15 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class VirementServiceImplTest {
@@ -84,6 +91,50 @@ class VirementServiceImplTest {
 			// Arrange / Act / Assert
 			assertThatThrownBy(() -> service.virer(NUMERO_SOURCE, NUMERO_SOURCE, MONTANT))
 					.isInstanceOf(IllegalArgumentException.class);
+		}
+	}
+
+	@Nested
+	@DisplayName("V3 : les deux comptes doivent exister")
+	class V3CompteIntrouvable {
+
+		@Test
+		@DisplayName("Un compte source inexistant lève CompteIntrouvableException")
+		void virer_sourceInexistante_leveCompteIntrouvableException() {
+			// Arrange
+			when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.empty());
+
+			// Act / Assert
+			assertThatThrownBy(() -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT))
+					.isInstanceOf(CompteIntrouvableException.class);
+		}
+
+		@Test
+		@DisplayName("Un compte destination inexistant lève CompteIntrouvableException")
+		void virer_destinationInexistante_leveCompteIntrouvableException() {
+			// Arrange
+			Compte source = new Compte(NUMERO_SOURCE, "Alice", new BigDecimal("100.00"), BigDecimal.ZERO);
+			when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.of(source));
+			when(repository.trouver(NUMERO_DESTINATION)).thenReturn(Optional.empty());
+
+			// Act / Assert
+			assertThatThrownBy(() -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT))
+					.isInstanceOf(CompteIntrouvableException.class);
+		}
+
+		@Test
+		@DisplayName("Quand un compte est introuvable, aucun compte n'est sauvegardé")
+		void virer_destinationInexistante_aucuneSauvegarde() {
+			// Arrange
+			Compte source = new Compte(NUMERO_SOURCE, "Alice", new BigDecimal("100.00"), BigDecimal.ZERO);
+			when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.of(source));
+			when(repository.trouver(NUMERO_DESTINATION)).thenReturn(Optional.empty());
+
+			// Act
+			catchThrowable(() -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT));
+
+			// Assert
+			verify(repository, never()).sauvegarder(any());
 		}
 	}
 
