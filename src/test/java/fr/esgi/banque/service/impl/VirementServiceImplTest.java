@@ -5,6 +5,7 @@ import fr.esgi.banque.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -31,6 +32,7 @@ class VirementServiceImplTest {
 
 	private static final String NUMERO_SOURCE = "FR001";
 	private static final String NUMERO_DESTINATION = "FR002";
+	private static final BigDecimal MONTANT = new BigDecimal("50.00");
 
 	@Mock
 	private CompteRepository repository;
@@ -69,6 +71,19 @@ class VirementServiceImplTest {
 
 			// Assert
 			verifyNoInteractions(repository, notifications);
+		}
+	}
+
+	@Nested
+	@DisplayName("V2 : un virement vers le même compte est refusé")
+	class V2MemeCompte {
+
+		@Test
+		@DisplayName("Source et destination identiques lèvent IllegalArgumentException")
+		void virer_memeCompte_leveIllegalArgumentException() {
+			// Arrange / Act / Assert
+			assertThatThrownBy(() -> service.virer(NUMERO_SOURCE, NUMERO_SOURCE, MONTANT))
+					.isInstanceOf(IllegalArgumentException.class);
 		}
 	}
 
