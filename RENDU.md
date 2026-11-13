@@ -30,7 +30,28 @@ Règles F1 et F2 : conformes, couvertes par des tests (`CalculFraisTest`).
 
 ## Partie B — service de virement (TDD)
 
-_En cours._
+Classe `fr.esgi.banque.service.impl.VirementServiceImpl`, développée règle par règle avec un cycle
+`red:` → `green:` → `refactor:` visible dans l'historique. Tests : `VirementServiceImplTest` (un `@Nested` par règle).
+
+### Choix des doublures
+
+- `CompteRepository` : **mock** Mockito. Bouchon (`when(...).thenReturn(Optional...)`) pour fournir les comptes,
+  vérification (`verify`, `never()`) pour les sauvegardes, qui sont l'effet attendu et ne s'observent pas autrement.
+- `NotificationService` : **mock** Mockito, vérifié avec `verify` / `never()` / `verifyNoInteractions`.
+- `Clock` : **vraie** horloge figée (`Clock.fixed`, Europe/Paris, vendredi 13/11/2026) : déterministe, sans mock.
+- `Compte` : **vrais objets** (objet métier simple) : les soldes sont vérifiés par l'état, pas par des appels.
+
+### Avancement
+
+| Règle | État |
+|---|---|
+| V1 montant null, nul ou négatif refusé | ✅ |
+| V2 virement vers le même compte refusé | ✅ |
+| V3 compte introuvable | ✅ |
+| V4 cas nominal (débit, crédit, sauvegardes, date du jour) | ✅ |
+| V5 solde insuffisant, rien n'est sauvegardé | en cours |
+| V6 alerte au-delà de 10 000 € | à faire |
+| V7 aucun virement le dimanche | à faire |
 
 ## Couverture de code
 
