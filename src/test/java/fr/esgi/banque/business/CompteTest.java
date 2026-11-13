@@ -114,4 +114,45 @@ class CompteTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("C3 : on ne crédite qu'un montant strictement positif")
+	class C3Crediter {
+
+		@Test
+		@DisplayName("Créditer un montant null est refusé")
+		void crediter_montantNull_leveIllegalArgumentException() {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, DECOUVERT);
+
+			// Act / Assert
+			assertThatThrownBy(() -> compte.crediter(null))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@ParameterizedTest(name = "montant {0}")
+		@ValueSource(strings = {"0", "0.00", "-0.01"})
+		@DisplayName("Créditer un montant nul ou négatif est refusé")
+		void crediter_montantNulOuNegatif_leveIllegalArgumentException(String montant) {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, DECOUVERT);
+
+			// Act / Assert
+			assertThatThrownBy(() -> compte.crediter(new BigDecimal(montant)))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test
+		@DisplayName("Créditer le plus petit montant positif (0,01) augmente le solde")
+		void crediter_montantMinimal_augmenteLeSolde() {
+			// Arrange
+			Compte compte = new Compte(NUMERO, TITULAIRE, SOLDE, DECOUVERT);
+
+			// Act
+			compte.crediter(new BigDecimal("0.01"));
+
+			// Assert
+			assertThat(compte.getSolde()).isEqualByComparingTo("100.01");
+		}
+	}
+
 }
