@@ -29,14 +29,13 @@ public class VirementServiceImpl {
 	public Virement virer(String numeroSource, String numeroDestination, BigDecimal montant) {
 		verifierMontantStrictementPositif(montant);
 		verifierComptesDifferents(numeroSource, numeroDestination);
-		if (LocalDate.now(horloge).getDayOfWeek() == DayOfWeek.SUNDAY) {
-			throw new VirementRefuseException("Aucun virement n'est accepté le dimanche");
-		}
+		LocalDate aujourdHui = LocalDate.now(horloge);
+		verifierJourOuvre(aujourdHui);
 		Compte source = trouverCompte(numeroSource);
 		Compte destination = trouverCompte(numeroDestination);
 		executer(source, destination, montant);
 		alerterSiMontantImportant(source, montant);
-		return new Virement(numeroSource, numeroDestination, montant, LocalDate.now(horloge));
+		return new Virement(numeroSource, numeroDestination, montant, aujourdHui);
 	}
 
 	/** Débite d'abord (peut lever SoldeInsuffisantException), puis crédite et sauvegarde les deux comptes. */
@@ -57,6 +56,12 @@ public class VirementServiceImpl {
 	private Compte trouverCompte(String numero) {
 		return repository.trouver(numero)
 				.orElseThrow(() -> new CompteIntrouvableException(numero));
+	}
+
+	private static void verifierJourOuvre(LocalDate jour) {
+		if (jour.getDayOfWeek() == DayOfWeek.SUNDAY) {
+			throw new VirementRefuseException("Aucun virement n'est accepté le dimanche");
+		}
 	}
 
 	private static void verifierComptesDifferents(String numeroSource, String numeroDestination) {

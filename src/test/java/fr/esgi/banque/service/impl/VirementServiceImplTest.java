@@ -290,12 +290,16 @@ class VirementServiceImplTest {
 	@DisplayName("V7 : aucun virement le dimanche")
 	class V7Dimanche {
 
+		private VirementServiceImpl serviceDimanche;
+
+		@BeforeEach
+		void horlogeDuDimanche() {
+			serviceDimanche = new VirementServiceImpl(repository, notifications, DIMANCHE);
+		}
+
 		@Test
 		@DisplayName("Un virement le dimanche lève VirementRefuseException")
 		void virer_leDimanche_leveVirementRefuseException() {
-			// Arrange
-			VirementServiceImpl serviceDimanche = new VirementServiceImpl(repository, notifications, DIMANCHE);
-
 			// Act / Assert
 			assertThatThrownBy(() -> serviceDimanche.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT))
 					.isInstanceOf(VirementRefuseException.class);
@@ -304,9 +308,6 @@ class VirementServiceImplTest {
 		@Test
 		@DisplayName("Un virement refusé le dimanche ne sauvegarde aucun compte")
 		void virer_leDimanche_aucuneSauvegarde() {
-			// Arrange
-			VirementServiceImpl serviceDimanche = new VirementServiceImpl(repository, notifications, DIMANCHE);
-
 			// Act
 			catchThrowable(() -> serviceDimanche.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT));
 
@@ -317,9 +318,6 @@ class VirementServiceImplTest {
 		@Test
 		@DisplayName("Un virement refusé le dimanche n'envoie aucune alerte, même au-delà de 10 000 €")
 		void virer_leDimanche_aucuneAlerte() {
-			// Arrange
-			VirementServiceImpl serviceDimanche = new VirementServiceImpl(repository, notifications, DIMANCHE);
-
 			// Act
 			catchThrowable(() -> serviceDimanche.virer(NUMERO_SOURCE, NUMERO_DESTINATION, new BigDecimal("10000.01")));
 
