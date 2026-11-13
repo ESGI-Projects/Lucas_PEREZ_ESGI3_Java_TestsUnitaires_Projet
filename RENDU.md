@@ -43,15 +43,28 @@ Classe `fr.esgi.banque.service.impl.VirementServiceImpl`, développée règle pa
 
 ### Avancement
 
-| Règle | État |
-|---|---|
-| V1 montant null, nul ou négatif refusé | ✅ |
-| V2 virement vers le même compte refusé | ✅ |
-| V3 compte introuvable | ✅ |
-| V4 cas nominal (débit, crédit, sauvegardes, date du jour) | ✅ |
-| V5 solde insuffisant, rien n'est sauvegardé | en cours |
-| V6 alerte au-delà de 10 000 € | à faire |
-| V7 aucun virement le dimanche | à faire |
+Toutes les règles V1 à V7 sont terminées (84 tests verts au total).
+
+| Règle | Cycle dans l'historique | Refactor |
+|---|---|---|
+| V1 montant null, nul ou négatif refusé | `red:` → `green:` → `refactor:` | extraction de `verifierMontantStrictementPositif` |
+| V2 virement vers le même compte refusé | `red:` → `green:` → `refactor:` | extraction de `verifierComptesDifferents` |
+| V3 compte introuvable | `red:` → `green:` → `refactor:` | `trouverCompte` ; helpers de test `compte`, `stubCompte`, `stubCompteInexistant` |
+| V4 cas nominal (débit, crédit, sauvegardes, date du jour) | `red:` → `green:` → `refactor:` | extraction de `executer` ; constante de test `AUJOURD_HUI` |
+| V5 solde insuffisant, rien n'est sauvegardé | `test:` uniquement (voir ci-dessous) | aucun |
+| V6 alerte au-delà de 10 000 € | `red:` → `green:` → `refactor:` | constante `SEUIL_ALERTE`, extraction de `alerterSiMontantImportant` |
+| V7 aucun virement le dimanche | `red:` → `green:` → `refactor:` | extraction de `verifierJourOuvre` (date du jour lue une seule fois) ; `@BeforeEach` pour le service du dimanche |
+
+**V5 : pas de phase rouge.** Le comportement était déjà assuré par la conception de V4 : le compte source est
+débité **avant** toute sauvegarde, donc la `SoldeInsuffisantException` levée par `Compte.debiter` interrompt le
+virement sans rien sauvegarder. Les tests de V5 ont été écrits et sont passés au vert immédiatement ; ils ont été
+validés en inversant temporairement l'ordre (sauvegarde avant débit) : `virer_soldeInsuffisant_aucuneSauvegarde`
+échoue alors bien. Aucun refactor pertinent pour cette règle.
+
+Ordre des contrôles dans `virer` : montant (V1) → comptes différents (V2) → jour ouvré (V7) → recherche des
+comptes (V3) → débit puis crédit et sauvegardes (V4, V5) → alerte éventuelle (V6, seulement si le virement a réussi).
+
+Valeurs limites de V6 testées : 9 999,99 €, 10 000 € et 10 000,00 € (pas d'alerte), 10 000,01 € (alerte).
 
 ## Couverture de code
 
