@@ -91,4 +91,25 @@ class CalculFraisTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("F4 : tenue offerte si le solde moyen atteint 1 000 € ou plus")
+	class F4SoldeEleve {
+
+		@ParameterizedTest(name = "solde moyen {0} -> frais {1}")
+		@CsvSource({
+				"999.99, 2.00",
+				"1000, 0",
+				"1000.00, 0",
+				"1000.01, 0"
+		})
+		@DisplayName("La tenue est offerte dès 1 000 € de solde moyen")
+		void fraisMensuels_selonSoldeMoyen_tenueOfferteDes1000(String soldeMoyen, String fraisAttendus) {
+			// Act
+			BigDecimal frais = calculFrais.fraisMensuels(AGE_ADULTE, new BigDecimal(soldeMoyen), false);
+
+			// Assert
+			assertThat(frais).isEqualByComparingTo(fraisAttendus);
+		}
+	}
+
 }
