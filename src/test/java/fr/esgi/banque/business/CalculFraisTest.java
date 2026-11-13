@@ -70,4 +70,25 @@ class CalculFraisTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("F3 : tenue offerte aux titulaires de moins de 26 ans")
+	class F3Jeune {
+
+		@ParameterizedTest(name = "âge {0} -> frais {1}")
+		@CsvSource({
+				"18, 0",
+				"25, 0",
+				"26, 2.00",
+				"27, 2.00"
+		})
+		@DisplayName("La tenue est offerte avant 26 ans, due à partir de 26 ans")
+		void fraisMensuels_selonAge_tenueOfferteAvant26Ans(int age, String fraisAttendus) {
+			// Act
+			BigDecimal frais = calculFrais.fraisMensuels(age, SOLDE_FAIBLE, false);
+
+			// Assert
+			assertThat(frais).isEqualByComparingTo(fraisAttendus);
+		}
+	}
+
 }
