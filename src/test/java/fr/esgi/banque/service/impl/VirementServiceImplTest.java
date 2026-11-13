@@ -28,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -240,6 +242,41 @@ class VirementServiceImplTest {
 
 			// Assert
 			verify(repository, never()).sauvegarder(any());
+		}
+	}
+
+	@Nested
+	@DisplayName("V6 : alerte au titulaire source au-delà de 10 000 €")
+	class V6AlerteGrosMontant {
+
+		private Compte source;
+
+		@BeforeEach
+		void comptesExistants() {
+			source = compte(NUMERO_SOURCE, "50000.00");
+			stubCompte(source);
+			stubCompte(compte(NUMERO_DESTINATION, "0.00"));
+		}
+
+		@ParameterizedTest(name = "montant {0}")
+		@ValueSource(strings = {"10000", "10000.00", "9999.99"})
+		@DisplayName("Un virement de 10 000 € ou moins ne déclenche pas d'alerte")
+		void virer_montantJusquA10000_pasDAlerte(BigDecimal montant) {
+			// Act
+			service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant);
+
+			// Assert
+			verify(notifications, never()).alerter(anyString(), anyString());
+		}
+
+		@Test
+		@DisplayName("Un virement de 10 000,01 € alerte le titulaire du compte source")
+		void virer_montantSuperieurA10000_alerteLeTitulaireSource() {
+			// Act
+			service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, new BigDecimal("10000.01"));
+
+			// Assert
+			verify(notifications).alerter(eq(source.getTitulaire()), anyString());
 		}
 	}
 
