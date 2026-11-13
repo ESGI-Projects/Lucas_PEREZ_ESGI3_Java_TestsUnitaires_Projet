@@ -8,6 +8,7 @@ import fr.esgi.banque.service.Virement;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import java.time.LocalDate;
 
 public class VirementServiceImpl {
 
@@ -26,7 +27,11 @@ public class VirementServiceImpl {
 		verifierComptesDifferents(numeroSource, numeroDestination);
 		Compte source = trouverCompte(numeroSource);
 		Compte destination = trouverCompte(numeroDestination);
-		return null;
+		source.debiter(montant);
+		destination.crediter(montant);
+		repository.sauvegarder(source);
+		repository.sauvegarder(destination);
+		return new Virement(numeroSource, numeroDestination, montant, LocalDate.now(horloge));
 	}
 
 	private Compte trouverCompte(String numero) {
