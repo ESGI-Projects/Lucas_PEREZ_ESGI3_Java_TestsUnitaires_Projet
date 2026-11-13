@@ -1,6 +1,7 @@
 package fr.esgi.banque.service.impl;
 
 import fr.esgi.banque.business.Compte;
+import fr.esgi.banque.business.SoldeInsuffisantException;
 import fr.esgi.banque.service.CompteIntrouvableException;
 import fr.esgi.banque.service.CompteRepository;
 import fr.esgi.banque.service.NotificationService;
@@ -210,6 +211,35 @@ class VirementServiceImplTest {
 			// Assert
 			assertThat(virement).isEqualTo(
 					new Virement(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT, AUJOURD_HUI));
+		}
+	}
+
+	@Nested
+	@DisplayName("V5 : solde insuffisant, l'exception remonte et rien n'est sauvegardé")
+	class V5SoldeInsuffisant {
+
+		@BeforeEach
+		void sourceSansProvisionSuffisante() {
+			stubCompte(compte(NUMERO_SOURCE, "10.00"));
+			stubCompte(compte(NUMERO_DESTINATION, "20.00"));
+		}
+
+		@Test
+		@DisplayName("Un solde insuffisant fait remonter SoldeInsuffisantException")
+		void virer_soldeInsuffisant_leveSoldeInsuffisantException() {
+			// Act / Assert
+			assertThatThrownBy(() -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT))
+					.isInstanceOf(SoldeInsuffisantException.class);
+		}
+
+		@Test
+		@DisplayName("Un solde insuffisant n'entraîne aucune sauvegarde")
+		void virer_soldeInsuffisant_aucuneSauvegarde() {
+			// Act
+			catchThrowable(() -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT));
+
+			// Assert
+			verify(repository, never()).sauvegarder(any());
 		}
 	}
 
