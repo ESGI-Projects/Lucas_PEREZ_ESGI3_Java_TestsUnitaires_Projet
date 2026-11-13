@@ -4,6 +4,7 @@ import fr.esgi.banque.business.Compte;
 import fr.esgi.banque.service.CompteIntrouvableException;
 import fr.esgi.banque.service.CompteRepository;
 import fr.esgi.banque.service.NotificationService;
+import fr.esgi.banque.service.Virement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,10 +18,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -148,6 +151,64 @@ class VirementServiceImplTest {
 
 			// Assert
 			verify(repository, never()).sauvegarder(any());
+		}
+	}
+
+	@Nested
+	@DisplayName("V4 : cas nominal, source débitée, destination créditée, comptes sauvegardés")
+	class V4CasNominal {
+
+		private Compte source;
+		private Compte destination;
+
+		@BeforeEach
+		void comptesExistants() {
+			source = compte(NUMERO_SOURCE, "100.00");
+			destination = compte(NUMERO_DESTINATION, "20.00");
+			stubCompte(source);
+			stubCompte(destination);
+		}
+
+		@Test
+		@DisplayName("Le compte source est débité du montant")
+		void virer_casNominal_debiteLaSource() {
+			// Act
+			service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT);
+
+			// Assert
+			assertThat(source.getSolde()).isEqualByComparingTo("50.00");
+		}
+
+		@Test
+		@DisplayName("Le compte destination est crédité du montant")
+		void virer_casNominal_crediteLaDestination() {
+			// Act
+			service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT);
+
+			// Assert
+			assertThat(destination.getSolde()).isEqualByComparingTo("70.00");
+		}
+
+		@Test
+		@DisplayName("Les deux comptes sont sauvegardés")
+		void virer_casNominal_sauvegardeLesDeuxComptes() {
+			// Act
+			service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT);
+
+			// Assert
+			verify(repository).sauvegarder(source);
+			verify(repository).sauvegarder(destination);
+		}
+
+		@Test
+		@DisplayName("Le virement renvoyé contient les numéros, le montant et la date du jour")
+		void virer_casNominal_renvoieLeVirementDateDuJour() {
+			// Act
+			Virement virement = service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT);
+
+			// Assert
+			assertThat(virement).isEqualTo(
+					new Virement(NUMERO_SOURCE, NUMERO_DESTINATION, MONTANT, LocalDate.of(2026, 11, 13)));
 		}
 	}
 
